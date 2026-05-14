@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for f in test_*.js; do
+  echo "Running $f..."
+  node "$f"
+  echo ""
+done
+

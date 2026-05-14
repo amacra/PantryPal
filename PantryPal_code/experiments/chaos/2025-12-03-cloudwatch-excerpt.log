@@ -1,0 +1,9 @@
+1764752488578  INIT_START Runtime Version: nodejs:20.v91	Runtime Version ARN: arn:aws:lambda:ca-central-1::runtime:10a462e31cab25e158637e367add6f0cb2340955bd723a5304ec7834d6db399e
+1764752489005  START RequestId: 1aaf161e-d552-4476-9a29-38968a7571e6 Version: $LATEST
+1764752489006  2025-12-03T09:01:29.006Z	1aaf161e-d552-4476-9a29-38968a7571e6	INFO	Incoming event: {"httpMethod":"POST","headers":{},"body":"{\"UserID\":\"test-user-1\",\"ingredients\":[\"chicken\",\"rice\",\"onion\"]}"}
+1764752489043  2025-12-03T09:01:29.043Z	1aaf161e-d552-4476-9a29-38968a7571e6	WARN	Chaos mode: mocking Spoonacular failure
+1764752489044  2025-12-03T09:01:29.044Z	1aaf161e-d552-4476-9a29-38968a7571e6	INFO	Circuit open - returning fallback for ingredients: [ 'chicken', 'rice', 'onion' ]
+1764752489046  2025-12-03T09:01:29.046Z	1aaf161e-d552-4476-9a29-38968a7571e6	INFO	Recipes returned: []
+1764752490403  2025-12-03T09:01:30.403Z	1aaf161e-d552-4476-9a29-38968a7571e6	INFO	History saved for UserID: test-user-1
+1764752490426  END RequestId: 1aaf161e-d552-4476-9a29-38968a7571e6
+1764752490426  REPORT RequestId: 1aaf161e-d552-4476-9a29-38968a7571e6	Duration: 1420.12 ms	Billed Duration: 1843 ms	Memory Size: 128 MB	Max Memory Used: 92 MB	Init Duration: 422.67 ms

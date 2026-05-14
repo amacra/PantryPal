@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: PantryPal API
+  version: 1.0.0
+paths:
+  /suggestMeals:
+    post:
+      summary: Suggest meals based on pantry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pantryItems:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      quantity:
+                        type: number
+                      unit:
+                        type: string
+                preferences:
+                  type: object
+                  properties:
+                    diet:
+                      type: array
+                      items:
+                        type: string
+                    excludeIngredients:
+                      type: array
+                      items:
+                        type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        recipeId:
+                          type: string
+                        title:
+                          type: string
+                        ingredientsNeeded:
+                          type: array
+                          items:
+                            type: string
+                        score:
+                          type: number
+                  cacheHit:
+                    type: boolean
+  /signup:
+    post:
+      summary: User signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  sessionToken:
+                    type: string
+  /login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionToken:
+                    type: string
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string

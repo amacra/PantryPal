@@ -1,0 +1,7 @@
+HTTP/2 200 
+date: Wed, 03 Dec 2025 08:55:41 GMT
+content-type: application/json
+content-length: 77
+apigw-requestid: VAQp0glKYosEMqw=
+
+{"UserID":"chaos-test","ingredients":["chicken","rice","onion"],"recipes":[]}
