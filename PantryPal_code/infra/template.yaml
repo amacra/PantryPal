@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: PantryPal regional API and persistent data
+Parameters:
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+  SpoonacularApiKey:
+    Type: String
+    NoEcho: true
+  FrontendOrigin:
+    Type: String
+    Default: http://localhost:3000
+  CallExternalApi:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+Resources:
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      CorsConfiguration:
+        AllowOrigins: [!Ref FrontendOrigin]
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [Content-Type, Authorization]
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
+  Users:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: UserID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: UserID
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+  History:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: UserID
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: UserID
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+  Backend:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../lambda_functions/suggest-function/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Timeout: 29
+      MemorySize: 256
+      ReservedConcurrentExecutions: 10
+      Environment:
+        Variables:
+          USERS_TABLE: !Ref Users
+          HISTORY_TABLE: !Ref History
+          JWT_SECRET: !Ref JwtSecret
+          SPOONACULAR_API_KEY: !Ref SpoonacularApiKey
+          CALL_EXTERNAL_API: !Ref CallExternalApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Users
+        - DynamoDBCrudPolicy:
+            TableName: !Ref History
+      Events:
+        Signup:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /signup, Method: POST}
+        Login:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /login, Method: POST}
+        Suggest:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /suggest, Method: POST}
+        DeleteAccount:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /delete_account, Method: POST}
+        Health:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /health, Method: GET}
+  BackendErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: PantryPal backend errors; attach an SNS action for notifications
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref Backend
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 5
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+  BackendLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${Backend}
+      RetentionInDays: 30
+Outputs:
+  ApiBaseUrl:
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prod

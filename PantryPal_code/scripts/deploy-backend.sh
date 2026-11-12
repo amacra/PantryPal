@@ -1,14 +1,9 @@
-#!/bin/bash
-# Deploy backend (Lambda + API Gateway)
-# Assumes backend already deployed; this is a placeholder for updates
-
-set -e
-
-echo "Backend is already deployed. Run Terraform or SAM deploy if updates needed."
-echo "For example: terraform apply or sam deploy"
-
-# Placeholder: add actual deploy commands here if needed
-# aws lambda update-function-code --function-name PantryPalHello --zip-file fileb://lambda.zip
-# etc.
-
-echo "Backend deploy placeholder executed."
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ "${AWS_REGION:-ca-central-1}" != ca-central-1 ]]; then
+  echo 'PantryPal must be deployed in ca-central-1' >&2
+  exit 1
+fi
+sam build --template-file infra/template.yaml
+sam deploy --guided --region ca-central-1

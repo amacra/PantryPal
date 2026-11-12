@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '',
+  baseURL: process.env.REACT_APP_API_BASE_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -20,9 +20,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !['/login', '/signup'].includes(error.config?.url)) {
       // Handle unauthorized
       localStorage.removeItem('sessionToken');
+      localStorage.removeItem('userEmail');
       window.location.href = '/login';
     }
     return Promise.reject(error);

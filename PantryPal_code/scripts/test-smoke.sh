@@ -1,24 +1,10 @@
-#!/bin/bash
-# Smoke tests for PantryPal API
-
-API_BASE="https://your-api-gateway-url.amazonaws.com/prod"
-
-echo "Testing health check..."
-curl -X GET "$API_BASE/health"
-
-echo "Testing signup..."
-curl -X POST "$API_BASE/signup" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"pass"}'
-
-echo "Testing login..."
-curl -X POST "$API_BASE/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"pass"}'
-
-echo "Testing suggestMeals..."
-curl -X POST "$API_BASE/suggestMeals" \
-  -H "Content-Type: application/json" \
-  -d '{"pantryItems":[{"name":"chicken","quantity":2,"unit":"lbs"}]}'
-
-echo "Smoke tests completed."
+#!/usr/bin/env bash
+set -euo pipefail
+: "${API_BASE:?Set API_BASE to the deployed API URL}"
+curl --fail-with-body --silent --show-error "$API_BASE/health"
+# Protected endpoints require a token; this read-only smoke check creates no accounts.
+if [[ -n "${SESSION_TOKEN:-}" ]]; then
+  curl --fail-with-body --silent --show-error "$API_BASE/suggest" \
+    -H "Authorization: Bearer $SESSION_TOKEN" -H 'Content-Type: application/json' \
+    -d '{"ingredients":["rice","tomato"]}'
+fi

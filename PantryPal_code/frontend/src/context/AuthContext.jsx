@@ -5,6 +5,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+  const [authReady, setAuthReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
 
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setUserEmail(email);
     }
+    setAuthReady(true);
   }, []);
 
   const login = (token, email) => {
@@ -32,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userEmail, login, logout }}>
+    <AuthContext.Provider value={{ authReady, isAuthenticated, userEmail, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

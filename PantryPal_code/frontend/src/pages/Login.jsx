@@ -17,12 +17,12 @@ export default function Login() {
     try {
       const response = await api.post("/login", { email, password });
       // backend returns { token, expiresIn }; pass email too so AuthContext stores userEmail
-      login(response.data.token, email);
+      login(response.data.sessionToken, response.data.UserID || email);
       // Avoid a blocking alert which can interfere with React state propagation
       navigate("/suggest");
     } catch (err) {
       console.error(err);
-      const backendMessage = err.response?.data?.message;
+      const backendMessage = err.response?.data?.error;
       if (backendMessage && backendMessage.toLowerCase().includes('deleted')) {
         setError("This account has been deleted. Please sign up again.");
       } else {

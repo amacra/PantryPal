@@ -18,12 +18,12 @@ export default function Signup() {
 
     try {
       const response = await api.post("/signup", { email, password, consent });
-      login(response.data.sessionToken || '', email);
+      login(response.data.sessionToken, response.data.UserID || email);
       alert("Signup successful!");
       navigate("/suggest");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Signup failed");
+      setError(err.response?.data?.error || "Signup failed");
     }
   };
 
@@ -62,6 +62,8 @@ export default function Signup() {
           Password
           <input
             type="password"
+            minLength={8}
+            maxLength={128}
             value={password}
             required
             onChange={(e) => setPassword(e.target.value)}
@@ -81,6 +83,7 @@ export default function Signup() {
           <input
             type="checkbox"
             checked={consent}
+            required
             onChange={(e) => setConsent(e.target.checked)}
             style={{ marginRight: 8 }}
           />

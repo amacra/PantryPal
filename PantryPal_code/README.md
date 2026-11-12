@@ -1,5 +1,9 @@
 # PantryPal - What-Can-I-Cook Recommender
 
+Current implementation, API contract, test commands, and SAM deployment: [docs/implementation.md](docs/implementation.md). Older deliverables below describe the original submission; current source supersedes the bundled Lambda ZIP.
+
+Use Node.js 20+ locally. Backend source now implements signup, login, authenticated suggestions, account deletion, retention, and upstream failure controls.
+
 ## Setup
 
 1. Clone the repo and navigate to the project.
@@ -9,12 +13,12 @@
 ## Local Development
 
 - Start frontend: `cd frontend && npm start` (runs on http://localhost:3000)
-- Backend is deployed on AWS; use staging/prod URLs for testing.
+- Backend is deployable with AWS SAM; see the current implementation guide for configuration.
 
 ## Deployment
 
 - Frontend: Run `./scripts/deploy-frontend.sh` (requires AWS CLI configured)
-- Backend: Already deployed; update via AWS Console or Terraform if needed.
+- Backend: Run `./scripts/deploy-backend.sh` to build and deploy with AWS SAM in ca-central-1.
 
 ## Environment Variables
 

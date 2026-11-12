@@ -1,8 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
-
-test('renders learn react link', () => {
+test('shows the landing page and account navigation', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Welcome to PantryPal' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Login' })).toHaveAttribute('href', '/login');
 });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -12,9 +12,10 @@ const SuggestMeals = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fallback, setFallback] = useState(false);
   const [deleteEmail, setDeleteEmail] = useState('');
   const [deleteEmailError, setDeleteEmailError] = useState('');
-  const { userEmail } = useAuth();
+  const { userEmail, logout, authReady } = useAuth();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -50,6 +51,7 @@ const SuggestMeals = () => {
       
       const response = await api.post('/suggest', payload);
       setSuggestions(response.data.recipes || []);
+      setFallback(response.data.stale === true);
     } catch (err) {
       console.error('API Error:', err);
       setError(err.response?.data?.error || err.message || 'Failed to get suggestions');
@@ -63,8 +65,7 @@ const SuggestMeals = () => {
     setDeleteError('');
 
     // Validate email matches
-    if (deleteEmail !== userEmail) {
-      console.log('Email mismatch:', deleteEmail, userEmail);
+    if (deleteEmail.trim().toLowerCase() !== userEmail) {
       setDeleteEmailError('Email does not match your account email');
       return;
     }
@@ -76,18 +77,19 @@ const SuggestMeals = () => {
         confirmDelete: true
       });
         alert('Account deleted successfully');
-        localStorage.removeItem('sessionToken');
-        localStorage.removeItem('userEmail');
-        navigate('/');
+        logout();
+        navigate('/', { state: { accountDeleted: true } });
     } catch (err) {
         console.error('Delete account error:', err);
-        setDeleteError(err.response?.data?.message || 'Failed to delete account');
+        setDeleteError(err.response?.data?.error || 'Failed to delete account');
     } finally {
         setDeleteLoading(false);
-        setShowDeleteConfirm(false);
         setDeleteEmail('');
     }
   };
+
+  if (!authReady) return <LoadingSpinner />;
+  if (!isAuthenticated) return <Navigate to='/login' replace />;
 
   return (
     <div style={{ maxWidth: 600, margin: "60px auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
@@ -174,6 +176,7 @@ const SuggestMeals = () => {
       </form>
       {loading && <LoadingSpinner />}
       {error && <ErrorMessage message={error} />}
+      {fallback && <p>Recipe service is temporarily unavailable. Please try again later.</p>}
       <div style={{ marginTop: 20 }}>
         <h3 style={{ marginBottom: 12 }}>Suggestions</h3>
         {suggestions.length > 0 ? (
